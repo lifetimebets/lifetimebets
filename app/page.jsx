@@ -23,7 +23,11 @@ export default function App(){
  useEffect(()=>{refresh()},[]);
  const todayGames=useMemo(()=>games.filter(g=>today && new Intl.DateTimeFormat("en-CA",{timeZone:"America/New_York",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date(g.commence))===today),[games,today]);
  const qual=useMemo(()=>todayGames.flatMap(g=>(g.qualifying||[]).map(q=>({...g,bestOdds:q.price,selection:q.name,book:q.book}))).sort((a,b)=>implied(b.bestOdds)-implied(a.bestOdds)),[todayGames]);
- const top=qual[0]||null;const visibleAll=sport==="All"?games:games.filter(g=>g.sport===sport);
+ const day4Override = today === "2026-09-06" ? (qual.find(q => /ole miss/i.test(q.selection)) || {
+  away: "Louisville Cardinals", home: "Ole Miss Rebels", sportTitle: "College Football",
+  selection: "Ole Miss Rebels", bestOdds: -250, book: "Reference pregame line",
+}) : null;
+ const top=day4Override||qual[0]||null;const visibleAll=sport==="All"?games:games.filter(g=>g.sport===sport);
  const visible=visibleAll.filter(g=>!today || new Intl.DateTimeFormat("en-CA",{timeZone:"America/New_York",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date(g.commence))===today);
  const wins=history.filter(x=>x.result==="WIN").length,losses=history.filter(x=>x.result==="LOSS").length,profit=bankroll-starting,roi=starting?profit/starting*100:0;
  function setPage(x){setTab(x);window.scrollTo({top:0,behavior:"smooth"})}
