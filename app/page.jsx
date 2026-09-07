@@ -67,7 +67,7 @@ export default function Home(){
           <h1>Every game.<br/><span>One system.</span></h1>
           <p>Browse the entire slate across every supported sport. LIFETIMEBETS highlights the moneylines that meet your -200 to -500 rule.</p>
         </div>
-        <div className="hero-logo">LB</div>
+        <div className="hero-logo"><img src="/lifetimebets-logo.png" alt="LIFETIMEBETS LB logo" /></div>
       </div>
 
       <section className="stats-grid">
@@ -105,7 +105,7 @@ export default function Home(){
   function settings(){return <><PageTitle title="Settings" subtitle="Control how LIFETIMEBETS operates."/><section className="card rules">{[["Starting bankroll","$40.00"],["Current bankroll",`$${bankroll.toFixed(2)}`],["Odds range","-200 to -500"],["Market","Moneyline"],["Sports","All supported"],["Challenge","30 days"]].map(([a,b])=><div className="setting" key={a}><span>{a}</span><b>{b}</b></div>)}</section></>;}
 
   return <main>
-    <header className="topbar"><button className="menu-btn" onClick={()=>setMenu(!menu)}><Icon type="menu"/></button><div className="brand"><span>LB</span> LIFETIMEBETS</div><div className="live-dot"><i/> LIVE</div></header>
+    <header className="topbar"><button className="menu-btn" onClick={()=>setMenu(!menu)}><Icon type="menu"/></button><div className="brand"><img src="/lifetimebets-logo.png" alt="LB" /> <span>LIFETIMEBETS</span></div><div className="live-dot"><i/> LIVE</div></header>
     {menu&&<div className="menu-pop"><b>LIFETIMEBETS</b><span>Professional sportsbook interface</span><span>Live all-sports slate</span><span>Moneyline filter: -200 to -500</span></div>}
     <div className="content">{tab==="home"?home():tab==="stats"?stats():tab==="history"?historyPage():tab==="challenge"?challenge():settings()}</div>
     {msg&&<div className="toast">{msg}</div>}
