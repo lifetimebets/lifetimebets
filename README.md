@@ -1,19 +1,22 @@
-# LIFETIMEBETS v5
+# LIFETIMEBETS v7
 
-Professional Next.js sportsbook-style tracker.
+Professional Next.js sports-betting dashboard.
 
-## Rules
-- Moneyline only
-- Qualifying odds: -200 through -500 inclusive
-- Any supported sport
-- No forced bet when nothing qualifies
-- Current official record: 3-0
-- Current bankroll: $83.29
+## v7 changes
+- Home and Picks are now separate screens.
+- Picks automatically selects the #1 qualifying moneyline from the full returned slate.
+- Moneyline rule remains -200 through -500 only.
+- Added live all-sports API route for NFL, NCAAF, MLB, NBA, NCAAB, WNBA, NHL, major soccer leagues, and US Open tennis.
+- Sports tabs filter the live slate by sport.
+- Stats includes the betting calendar.
+- Exact LIFETIMEBETS LB logo is included in `public/lifetimebets-logo.png`.
 
-## Vercel
-1. Import the GitHub repository as a Next.js project.
-2. Keep Root Directory as `./`.
-3. Add `ODDS_API_KEY` under Project Settings → Environment Variables.
-4. Redeploy.
+## Environment
+Set `ODDS_API_KEY` in Vercel Environment Variables. Never put the real key in GitHub.
 
-The API key is server-side only.
+## Run
+npm install
+npm run dev
+
+## Deploy
+Push to GitHub and let the connected Vercel project deploy automatically.

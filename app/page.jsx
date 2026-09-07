@@ -45,7 +45,7 @@ export default function Home(){
   const [calendarMonth,setCalendarMonth]=useState(new Date(2026,8,1));
   const [selectedDay,setSelectedDay]=useState(null);
   const wins=history.filter(x=>x.result==="WIN").length, losses=history.length-wins, profit=bankroll-40;
-  const qualifying=useMemo(()=>games.filter(g=>Number.isFinite(g.bestOdds)&&g.bestOdds<=-200&&g.bestOdds>=-500).sort((a,b)=>a.bestOdds-b.bestOdds),[games]);
+  const qualifying=useMemo(()=>games.filter(g=>Number.isFinite(g.bestOdds)&&g.bestOdds<=-200&&g.bestOdds>=-500).sort((a,b)=>{ const pa=implied(a.bestOdds), pb=implied(b.bestOdds); return pb-pa || Math.abs(a.bestOdds)-Math.abs(b.bestOdds); }),[games]);
   const top=qualifying[0]||null;
   const visible=sport==="All"?games:games.filter(g=>g.sport===sport);
 
@@ -80,7 +80,7 @@ export default function Home(){
       </section>
 
       <section className="card featured">
-        <div className="card-head"><div><div className="section-kicker">TODAY'S #1 PLAY</div><h2>{top?top.selection:"Scanning live slate..."}</h2></div>
+        <div className="card-head"><div><div className="section-kicker">TODAY'S #1 PLAY • AUTOMATIC</div><h2>{top?top.selection:"Scanning live slate..."}</h2></div>
           <button className="icon-btn" onClick={refresh} disabled={loading} aria-label="Refresh odds"><span className={loading?"spin":""}><Icon type="refresh"/></span></button>
         </div>
         {top?<><div className="matchup">{top.away} <span>at</span> {top.home}</div>
@@ -101,6 +101,15 @@ export default function Home(){
     </>;
   }
 
+  function picks(){
+    return <><PageTitle title="Today's Pick" subtitle="LIFETIMEBETS automatically selects the highest-confidence qualifying moneyline."/>
+      <section className="card featured automatic-pick">
+        <div className="card-head"><div><div className="section-kicker">AUTO-SELECTED #1 PLAY</div><h2>{top?top.selection:"Scanning the full slate..."}</h2></div><span className="auto-badge"><Icon type="sparkles"/> AUTO</span></div>
+        {top?<><div className="matchup">{top.away} <span>at</span> {top.home}</div><div className="play-row"><div className="odds-pill">{top.bestOdds}</div><div><div className="confidence">{implied(top.bestOdds).toFixed(1)}% implied probability</div><div className="muted">{top.sportTitle} • {top.book||"Best available"}</div></div></div><div className="analysis"><Icon type="shield"/><div><b>Why this is #1:</b><br/>The app scans every returned sport and ranks only moneylines from -200 through -500 by implied probability. No qualifying line means no forced bet.</div></div><div className="bet-box"><div><span>RULE</span><b>ML • -200 to -500</b></div><div><span>STATUS</span><b>READY TO BET</b></div></div></>:<div className="empty"><Icon type="activity"/><b>{loading?"Scanning every sport...":"No qualifying play right now."}</b><span>Connect the live odds key to let the system select today's play automatically.</span></div>}
+      </section>
+      <section className="card"><div className="section-kicker">HOW IT WORKS</div>{["Pull every supported sport","Keep only moneylines from -200 through -500","Rank by highest implied probability","Automatically publish the #1 play","Never force a bet when nothing qualifies"].map((x,i)=><div className="rule" key={x}><Icon type={i===3?"sparkles":"shield"}/><span>{x}</span></div>)}</section>
+    </>;
+  }
   function stats(){
     const year=calendarMonth.getFullYear(), month=calendarMonth.getMonth();
     const monthName=calendarMonth.toLocaleString([], {month:"long",year:"numeric"});
@@ -133,9 +142,9 @@ export default function Home(){
   return <main>
     <header className="topbar"><button className="menu-btn" onClick={()=>setMenu(!menu)}><Icon type="menu"/></button><div className="brand"><img src="/lifetimebets-logo.png" alt="LB" /> <span>LIFETIMEBETS</span></div><div className="live-dot"><i/> LIVE</div></header>
     {menu&&<div className="menu-pop"><b>LIFETIMEBETS</b><span>Professional sportsbook interface</span><span>Live all-sports slate</span><span>Moneyline filter: -200 to -500</span></div>}
-    <div className="content">{tab==="home"?home():tab==="stats"?stats():tab==="history"?historyPage():tab==="challenge"?challenge():settings()}</div>
+    <div className="content">{tab==="home"?home():tab==="picks"?picks():tab==="stats"?stats():tab==="challenge"?challenge():settings()}</div>
     {msg&&<div className="toast">{msg}</div>}
-    <nav className="bottom-nav"><Nav active={tab==="home"} icon={<Icon type="home"/>} label="Home" onClick={()=>setTab("home")}/><Nav active={tab==="home"} icon={<Icon type="list"/>} label="Picks" onClick={()=>setTab("home")}/><Nav active={tab==="stats"} icon={<Icon type="chart"/>} label="Stats" onClick={()=>setTab("stats")}/><Nav active={tab==="challenge"} icon={<Icon type="calendar"/>} label="Challenge" onClick={()=>setTab("challenge")}/><Nav active={tab==="settings"} icon={<Icon type="settings"/>} label="Settings" onClick={()=>setTab("settings")}/></nav>
+    <nav className="bottom-nav"><Nav active={tab==="home"} icon={<Icon type="home"/>} label="Home" onClick={()=>setTab("home")}/><Nav active={tab==="picks"} icon={<Icon type="list"/>} label="Picks" onClick={()=>setTab("picks")}/><Nav active={tab==="stats"} icon={<Icon type="chart"/>} label="Stats" onClick={()=>setTab("stats")}/><Nav active={tab==="challenge"} icon={<Icon type="calendar"/>} label="Challenge" onClick={()=>setTab("challenge")}/><Nav active={tab==="settings"} icon={<Icon type="settings"/>} label="Settings" onClick={()=>setTab("settings")}/></nav>
   </main>;
 }
 
