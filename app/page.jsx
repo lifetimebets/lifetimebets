@@ -42,6 +42,8 @@ function PageTitle({title,subtitle}) { return <div className="page-title"><div c
 export default function Home(){
   const [tab,setTab]=useState("home"), [sport,setSport]=useState("All"), [games,setGames]=useState([]), [loading,setLoading]=useState(false), [msg,setMsg]=useState(""), [menu,setMenu]=useState(false);
   const [history]=useState(initialHistory), [bankroll]=useState(83.29);
+  const [calendarMonth,setCalendarMonth]=useState(new Date(2026,8,1));
+  const [selectedDay,setSelectedDay]=useState(null);
   const wins=history.filter(x=>x.result==="WIN").length, losses=history.length-wins, profit=bankroll-40;
   const qualifying=useMemo(()=>games.filter(g=>Number.isFinite(g.bestOdds)&&g.bestOdds<=-200&&g.bestOdds>=-500).sort((a,b)=>a.bestOdds-b.bestOdds),[games]);
   const top=qualifying[0]||null;
@@ -99,7 +101,31 @@ export default function Home(){
     </>;
   }
 
-  function stats(){return <><PageTitle title="Stats" subtitle="Your LIFETIMEBETS performance."/><section className="stats-grid large"><Stat label="Win Rate" value={`${((wins/history.length)*100).toFixed(1)}%`}/><Stat label="Profit" value={`+$${profit.toFixed(2)}`} positive/><Stat label="Avg. Odds" value={Math.round(history.reduce((a,b)=>a+b.odds,0)/history.length)}/><Stat label="Record" value={`${wins}-${losses}`}/></section><section className="card"><div className="section-kicker">BANKROLL</div><div className="bankroll-big">${bankroll.toFixed(2)}</div><div className="muted">Starting bankroll $40.00</div></section></>;}
+  function stats(){
+    const year=calendarMonth.getFullYear(), month=calendarMonth.getMonth();
+    const monthName=calendarMonth.toLocaleString([], {month:"long",year:"numeric"});
+    const first=new Date(year,month,1).getDay();
+    const daysInMonth=new Date(year,month+1,0).getDate();
+    const cells=Array.from({length:first+daysInMonth},(_,i)=>i<first?null:i-first+1);
+    const byDay={};
+    history.forEach(b=>{
+      const d=new Date(b.date);
+      if(d.getFullYear()===year && d.getMonth()===month) byDay[d.getDate()]=b;
+    });
+    const changeMonth=(delta)=>{setSelectedDay(null);setCalendarMonth(new Date(year,month+delta,1));};
+    const selected=selectedDay?byDay[selectedDay]:null;
+    return <><PageTitle title="Stats" subtitle="Track performance by day and see your betting calendar."/>
+      <section className="stats-grid large"><Stat label="Win Rate" value={`${((wins/history.length)*100).toFixed(1)}%`}/><Stat label="Profit" value={`+$${profit.toFixed(2)}`} positive/><Stat label="Avg. Odds" value={Math.round(history.reduce((a,b)=>a+b.odds,0)/history.length)}/><Stat label="Record" value={`${wins}-${losses}`}/></section>
+      <section className="card calendar-card">
+        <div className="calendar-head"><div><div className="section-kicker">BETTING CALENDAR</div><h2>{monthName}</h2></div><div className="calendar-controls"><button onClick={()=>changeMonth(-1)} aria-label="Previous month">‹</button><button onClick={()=>changeMonth(1)} aria-label="Next month">›</button></div></div>
+        <div className="calendar-weekdays">{["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(d=><span key={d}>{d}</span>)}</div>
+        <div className="calendar-grid">{cells.map((day,i)=>{const bet=day?byDay[day]:null; const isToday=day===6&&month===8&&year===2026; return <button key={i} disabled={!day} onClick={()=>day&&setSelectedDay(day)} className={`calendar-day ${!day?"blank":""} ${bet?.result==="WIN"?"win-day":""} ${bet?.result==="LOSS"?"loss-day":""} ${selectedDay===day?"selected":""} ${isToday?"today":""}`}><span>{day||""}</span>{bet&&<small>{bet.result}</small>}</button>})}</div>
+        <div className="calendar-legend"><span><i className="legend-dot win-dot"/>Win</span><span><i className="legend-dot loss-dot"/>Loss</span><span><i className="legend-dot no-bet-dot"/>No bet</span></div>
+      </section>
+      {selected&&<section className="card calendar-detail"><div className="section-kicker">DAY {selected.day}</div><div className="calendar-detail-main"><div><h2>{selected.team}</h2><span>{selected.opponent} • {selected.date}</span></div><b>{selected.odds}</b><strong>{selected.result}</strong></div></section>}
+      <section className="card"><div className="section-kicker">BANKROLL</div><div className="bankroll-big">${bankroll.toFixed(2)}</div><div className="muted">Starting bankroll $40.00</div></section>
+    </>;
+  }
   function historyPage(){return <><PageTitle title="Bet History" subtitle="Every official LIFETIMEBETS play."/><section className="card history">{history.map(b=><div className="history-row" key={b.day}><div className="day">DAY {b.day}</div><div className="history-main"><b>{b.team}</b><span>vs {b.opponent} • {b.date}</span></div><div className="history-odds">{b.odds}</div><div className="win">{b.result}</div></div>)}</section></>;}
   function challenge(){return <><PageTitle title="Challenge" subtitle="Build the bankroll one official play at a time."/><section className="challenge-card"><div className="challenge-number">3<span>/30</span></div><div className="challenge-copy"><b>30-Day Challenge</b><span>27 days remaining</span></div></section><section className="card rules"><div className="section-kicker">LOCKED RULES</div>{["Moneyline only","Odds must be -200 through -500","Any sport can qualify","One official play per day","No forced bet when nothing qualifies"].map(x=><div className="rule" key={x}><Icon type="shield"/><span>{x}</span></div>)}</section></>;}
   function settings(){return <><PageTitle title="Settings" subtitle="Control how LIFETIMEBETS operates."/><section className="card rules">{[["Starting bankroll","$40.00"],["Current bankroll",`$${bankroll.toFixed(2)}`],["Odds range","-200 to -500"],["Market","Moneyline"],["Sports","All supported"],["Challenge","30 days"]].map(([a,b])=><div className="setting" key={a}><span>{a}</span><b>{b}</b></div>)}</section></>;}
