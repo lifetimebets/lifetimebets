@@ -3,6 +3,12 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+const TIME_ZONE = "America/New_York";
+
+function dateInTimeZone(value = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: TIME_ZONE, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(value));
+}
+
 const API="https://api.the-odds-api.com/v4";
 const SPORT_KEYS=[
   "americanfootball_nfl","americanfootball_ncaaf",
@@ -41,6 +47,8 @@ export async function GET(){
     });
   }));
   const games=results.flatMap(x=>x.status==="fulfilled"?x.value:[]).sort((a,b)=>new Date(a.commence)-new Date(b.commence));
-  const qualifying=games.flatMap(g=>g.qualifying.map(q=>({...g,bestOdds:q.price,selection:q.name,book:q.book}))).sort((a,b)=>implied(b.bestOdds)-implied(a.bestOdds));
-  return NextResponse.json({games,bestPick:qualifying[0]||null,updatedAt:new Date().toISOString(),sports:SPORT_KEYS.length});
+  const today=dateInTimeZone();
+  const todayGames=games.filter(g=>dateInTimeZone(g.commence)===today);
+  const qualifying=todayGames.flatMap(g=>g.qualifying.map(q=>({...g,bestOdds:q.price,selection:q.name,book:q.book}))).sort((a,b)=>implied(b.bestOdds)-implied(a.bestOdds));
+  return NextResponse.json({games,bestPick:qualifying[0]||null,today,todayGames:todayGames.length,updatedAt:new Date().toISOString(),sports:SPORT_KEYS.length});
 }
