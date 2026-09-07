@@ -1,28 +1,19 @@
-# LIFETIMEBETS v3
+# LIFETIMEBETS v4
 
-Professional sportsbook-style LIFETIMEBETS app.
+Professional Next.js sportsbook-style tracker.
 
-## Home screen
-The Home screen now behaves like a sportsbook lobby:
-- All supported sports
-- All returned games
-- Sport filter chips
-- Current moneylines
-- Qualifying -200 to -500 moneylines highlighted
-- Today's #1 qualifying play at the top
-- Bankroll / record / streak / profit
+## Rules
+- Moneyline only
+- Qualifying odds: -200 through -500 inclusive
+- Any supported sport
+- No forced bet when nothing qualifies
+- Current official record: 3-0
+- Current bankroll: $83.29
 
-## Live odds
-The server-side `/api/odds` route reads `ODDS_API_KEY` from the hosting environment. Do not put the real key into frontend code or commit it.
+## Vercel
+1. Import the GitHub repository as a Next.js project.
+2. Keep Root Directory as `./`.
+3. Add `ODDS_API_KEY` under Project Settings → Environment Variables.
+4. Redeploy.
 
-## Deployment
-This version uses Next.js and should be deployed to a Node-capable host such as Vercel rather than GitHub Pages if you want live odds from the secure backend.
-
-GitHub can remain the source-code repository.
-
-## Current challenge data
-Bankroll: $83.29
-Record: 3-0
-Profit: +$43.29
-Challenge: Day 3 / 30
-Permanent filter: Moneyline only, -200 through -500
+The API key is server-side only.
