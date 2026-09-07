@@ -1,155 +1,41 @@
 "use client";
+import {useEffect,useMemo,useState} from "react";
 
-import { useEffect, useMemo, useState } from "react";
-
-const SPORT_ORDER = ["All","NFL","NCAAF","MLB","NBA","NCAAB","WNBA","NHL","Soccer","Tennis"];
-const SPORT_LABELS = { All:"All Sports", NFL:"NFL", NCAAF:"College Football", MLB:"MLB", NBA:"NBA", NCAAB:"College Basketball", WNBA:"WNBA", NHL:"NHL", Soccer:"Soccer", Tennis:"Tennis" };
-
-
-function Icon({type}) {
-  const paths = {
-    sparkles:<><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3Z"/><path d="M19 14l.7 2.3L22 17l-2.3.7L19 20l-.7-2.3L16 17l2.3-.7L19 14Z"/></>,
-    dollar:<><circle cx="12" cy="12" r="9"/><path d="M14.5 8.5c-.6-.5-1.4-.8-2.5-.8-1.5 0-2.5.7-2.5 1.8 0 1.1.8 1.5 2.6 1.9 1.8.4 2.9.9 2.9 2.2 0 1.2-1.1 2-2.8 2-1.2 0-2.2-.3-3-.9M12 6.5v11"/></>,
-    trophy:<><path d="M8 4h8v4a4 4 0 0 1-8 0V4Z"/><path d="M8 6H5v1a3 3 0 0 0 3 3M16 6h3v1a3 3 0 0 1-3 3M12 12v4M9 20h6M10 16h4"/></>,
-    flame:<><path d="M13 3c1.5 3.2-.2 4.7 2 6.4 1.7 1.3 2.5 2.8 2.5 4.5A5.5 5.5 0 0 1 12 19.5 5.5 5.5 0 0 1 6.5 14c0-2.5 1.2-4.4 3.6-6.1-.2 2.1.5 3.1 1.2 3.6C12.7 9.5 11.9 6.3 13 3Z"/></>,
-    chart:<><path d="M4 19V5M4 19h16"/><path d="m7 15 3-4 3 2 5-7"/></>,
-    refresh:<><path d="M20 11a8 8 0 0 0-14.7-3L4 10"/><path d="M4 5v5h5M4 13a8 8 0 0 0 14.7 3L20 14"/><path d="M20 19v-5h-5"/></>,
-    shield:<><path d="M12 3 20 6v5c0 5-3.4 8.2-8 10-4.6-1.8-8-5-8-10V6l8-3Z"/><path d="m8.5 12 2.2 2.2 4.8-5"/></>,
-    activity:<><path d="M3 12h4l2-6 4 12 2-6h6"/></>,
-    menu:<><path d="M4 7h16M4 12h16M4 17h16"/></>,
-    home:<><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10M9 20v-6h6v6"/></>,
-    list:<><path d="M8 6h12M8 12h12M8 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01"/></>,
-    calendar:<><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></>,
-    settings:<><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.4 1.4-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V20h-2v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L9 17.2l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H7v-2h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L8.4 9l1.4-1.4.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V6h2v.2a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.2 9l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v2h-.2a1.7 1.7 0 0 0-1 1Z"/></>,
-  };
-  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[type]}</svg>;
-}
-
-const initialHistory = [
-  { day:1, date:"Sep 4, 2026", team:"Michigan State", opponent:"Toledo", odds:-405, result:"WIN" },
-  { day:2, date:"Sep 5, 2026", team:"Auburn", opponent:"Baylor", odds:-300, result:"WIN" },
-  { day:3, date:"Sep 5, 2026", team:"LSU", opponent:"Clemson", odds:-500, result:"WIN" }
+const SPORTS=["All","NFL","NCAAF","MLB","NBA","NCAAB","WNBA","NHL","Soccer","Tennis"];
+const LABEL={All:"All Sports",NFL:"NFL",NCAAF:"College Football",MLB:"MLB",NBA:"NBA",NCAAB:"College Basketball",WNBA:"WNBA",NHL:"NHL",Soccer:"Soccer",Tennis:"Tennis"};
+const seed=[
+ {day:1,date:"2026-09-04",team:"Michigan State",opponent:"Toledo",odds:-405,result:"WIN"},
+ {day:2,date:"2026-09-05",team:"Auburn",opponent:"Baylor",odds:-300,result:"WIN"},
+ {day:3,date:"2026-09-05",team:"LSU",opponent:"Clemson",odds:-500,result:"WIN"}
 ];
+const fmtMoney=n=>`${n>=0?"+":""}$${Number(n).toFixed(2)}`;
+const implied=o=>o<0?(-o/(-o+100))*100:(100/(o+100))*100;
+function Icon({type}){const p={home:<><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10M9 20v-6h6v6"/></>,list:<><path d="M8 6h12M8 12h12M8 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01"/></>,chart:<><path d="M4 19V5M4 19h16"/><path d="m7 15 3-4 3 2 5-7"/></>,calendar:<><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></>,settings:<><circle cx="12" cy="12" r="3"/><path d="M19 15l1 1-2 2-1-1a7 7 0 0 1-3 1v2h-3v-2a7 7 0 0 1-3-1l-1 1-2-2 1-1a7 7 0 0 1-1-3H3v-3h2a7 7 0 0 1 1-3L5 7l2-2 1 1a7 7 0 0 1 3-1V3h3v2a7 7 0 0 1 3 1l1-1 2 2-1 1a7 7 0 0 1 1 3h2v3h-2a7 7 0 0 1-1 3Z"/></>,spark:<><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3Z"/><path d="M19 14l.7 2.3L22 17l-2.3.7L19 20l-.7-2.3L16 17l2.3-.7L19 14Z"/></>,refresh:<><path d="M20 11a8 8 0 0 0-14.7-3L4 10"/><path d="M4 5v5h5M4 13a8 8 0 0 0 14.7 3L20 14"/><path d="M20 19v-5h-5"/></>,shield:<><path d="M12 3 20 6v5c0 5-3.4 8.2-8 10-4.6-1.8-8-5-8-10V6l8-3Z"/><path d="m8.5 12 2.2 2.2 4.8-5"/></>};return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{p[type]}</svg>}
+function Button({children,onClick,active}){return <button className={active?"pill active":"pill"} onClick={onClick}>{children}</button>}
 
-function implied(o){ return o < 0 ? (-o/(-o+100))*100 : (100/(o+100))*100; }
-
-function Stat({icon,label,value,positive}) {
-  return <div className="stat"><div className="stat-icon">{icon}</div><span>{label}</span><b className={positive?"positive":""}>{value}</b></div>;
-}
-function Nav({active,icon,label,onClick}) { return <button className={active?"nav active":"nav"} onClick={onClick}>{icon}<span>{label}</span></button>; }
-function PageTitle({title,subtitle}) { return <div className="page-title"><div className="section-kicker">LIFETIMEBETS</div><h1>{title}</h1><p>{subtitle}</p></div>; }
-
-export default function Home(){
-  const [tab,setTab]=useState("home"), [sport,setSport]=useState("All"), [games,setGames]=useState([]), [loading,setLoading]=useState(false), [msg,setMsg]=useState(""), [menu,setMenu]=useState(false);
-  const [history]=useState(initialHistory), [bankroll]=useState(83.29);
-  const [calendarMonth,setCalendarMonth]=useState(new Date(2026,8,1));
-  const [selectedDay,setSelectedDay]=useState(null);
-  const wins=history.filter(x=>x.result==="WIN").length, losses=history.length-wins, profit=bankroll-40;
-  const qualifying=useMemo(()=>games.filter(g=>Number.isFinite(g.bestOdds)&&g.bestOdds<=-200&&g.bestOdds>=-500).sort((a,b)=>{ const pa=implied(a.bestOdds), pb=implied(b.bestOdds); return pb-pa || Math.abs(a.bestOdds)-Math.abs(b.bestOdds); }),[games]);
-  const top=qualifying[0]||null;
-  const visible=sport==="All"?games:games.filter(g=>g.sport===sport);
-
-  async function refresh(){
-    setLoading(true); setMsg("");
-    try{
-      const r=await fetch("/api/odds");
-      const d=await r.json();
-      if(!r.ok) throw new Error(d.error||"Live odds unavailable");
-      setGames(d.games||[]);
-      setMsg(d.games?.length ? `Live slate updated • ${d.games.length} games` : "No games returned.");
-    }catch(e){setMsg(e.message);}
-    finally{setLoading(false);}
-  }
-  useEffect(()=>{refresh()},[]);
-
-  function home(){
-    return <>
-      <div className="hero">
-        <div><div className="eyebrow"><Icon type="sparkles"/> LIVE SPORTSBOOK SLATE</div>
-          <h1>Every game.<br/><span>One system.</span></h1>
-          <p>Browse the entire slate across every supported sport. LIFETIMEBETS highlights the moneylines that meet your -200 to -500 rule.</p>
-        </div>
-        <div className="hero-logo"><img src="/lifetimebets-logo.png" alt="LIFETIMEBETS LB logo" /></div>
-      </div>
-
-      <section className="stats-grid">
-        <Stat icon={<Icon type="dollar"/>} label="Bankroll" value={`$${bankroll.toFixed(2)}`}/>
-        <Stat icon={<Icon type="trophy"/>} label="Record" value={`${wins}-${losses}`}/>
-        <Stat icon={<Icon type="flame"/>} label="Streak" value={`W${wins}`}/>
-        <Stat icon={<Icon type="chart"/>} label="Profit" value={`+$${profit.toFixed(2)}`} positive/>
-      </section>
-
-      <section className="card featured">
-        <div className="card-head"><div><div className="section-kicker">TODAY'S #1 PLAY • AUTOMATIC</div><h2>{top?top.selection:"Scanning live slate..."}</h2></div>
-          <button className="icon-btn" onClick={refresh} disabled={loading} aria-label="Refresh odds"><span className={loading?"spin":""}><Icon type="refresh"/></span></button>
-        </div>
-        {top?<><div className="matchup">{top.away} <span>at</span> {top.home}</div>
-          <div className="play-row"><div className="odds-pill">{top.bestOdds}</div><div><div className="confidence">{implied(top.bestOdds).toFixed(1)}% implied</div><div className="muted">{top.sportTitle} • {top.book||"Best available"}</div></div></div>
-          <div className="analysis"><Icon type="shield"/><div><b>Qualifying play.</b><br/>Inside the permanent -200 to -500 moneyline range. The live slate is ranked by the strongest qualifying market price.</div></div>
-        </>:<div className="empty"><Icon type="activity"/><b>{loading?"Loading every sport...":"No qualifying play right now."}</b><span>The app will not force a bet outside the rules.</span></div>}
-      </section>
-
-      <section className="slate-head"><div><div className="section-kicker">TODAY'S SLATE</div><h2>All Sports</h2></div><span className="game-count">{visible.length} games</span></section>
-
-      <div className="sport-tabs" role="tablist">
-        {SPORT_ORDER.map(s=><button key={s} className={sport===s?"active":""} onClick={()=>setSport(s)}>{SPORT_LABELS[s]}</button>)}
-      </div>
-
-      <section className="games">
-        {visible.length ? visible.map(g=><GameCard key={g.eventId} game={g}/>) : <div className="empty slate-empty"><Icon type="activity"/><b>{loading?"Pulling the live slate...":"No games available."}</b><span>Tap refresh to check again.</span></div>}
-      </section>
-    </>;
-  }
-
-  function picks(){
-    return <><PageTitle title="Today's Pick" subtitle="LIFETIMEBETS automatically selects the highest-confidence qualifying moneyline."/>
-      <section className="card featured automatic-pick">
-        <div className="card-head"><div><div className="section-kicker">AUTO-SELECTED #1 PLAY</div><h2>{top?top.selection:"Scanning the full slate..."}</h2></div><span className="auto-badge"><Icon type="sparkles"/> AUTO</span></div>
-        {top?<><div className="matchup">{top.away} <span>at</span> {top.home}</div><div className="play-row"><div className="odds-pill">{top.bestOdds}</div><div><div className="confidence">{implied(top.bestOdds).toFixed(1)}% implied probability</div><div className="muted">{top.sportTitle} • {top.book||"Best available"}</div></div></div><div className="analysis"><Icon type="shield"/><div><b>Why this is #1:</b><br/>The app scans every returned sport and ranks only moneylines from -200 through -500 by implied probability. No qualifying line means no forced bet.</div></div><div className="bet-box"><div><span>RULE</span><b>ML • -200 to -500</b></div><div><span>STATUS</span><b>READY TO BET</b></div></div></>:<div className="empty"><Icon type="activity"/><b>{loading?"Scanning every sport...":"No qualifying play right now."}</b><span>Connect the live odds key to let the system select today's play automatically.</span></div>}
-      </section>
-      <section className="card"><div className="section-kicker">HOW IT WORKS</div>{["Pull every supported sport","Keep only moneylines from -200 through -500","Rank by highest implied probability","Automatically publish the #1 play","Never force a bet when nothing qualifies"].map((x,i)=><div className="rule" key={x}><Icon type={i===3?"sparkles":"shield"}/><span>{x}</span></div>)}</section>
-    </>;
-  }
-  function stats(){
-    const year=calendarMonth.getFullYear(), month=calendarMonth.getMonth();
-    const monthName=calendarMonth.toLocaleString([], {month:"long",year:"numeric"});
-    const first=new Date(year,month,1).getDay();
-    const daysInMonth=new Date(year,month+1,0).getDate();
-    const cells=Array.from({length:first+daysInMonth},(_,i)=>i<first?null:i-first+1);
-    const byDay={};
-    history.forEach(b=>{
-      const d=new Date(b.date);
-      if(d.getFullYear()===year && d.getMonth()===month) byDay[d.getDate()]=b;
-    });
-    const changeMonth=(delta)=>{setSelectedDay(null);setCalendarMonth(new Date(year,month+delta,1));};
-    const selected=selectedDay?byDay[selectedDay]:null;
-    return <><PageTitle title="Stats" subtitle="Track performance by day and see your betting calendar."/>
-      <section className="stats-grid large"><Stat label="Win Rate" value={`${((wins/history.length)*100).toFixed(1)}%`}/><Stat label="Profit" value={`+$${profit.toFixed(2)}`} positive/><Stat label="Avg. Odds" value={Math.round(history.reduce((a,b)=>a+b.odds,0)/history.length)}/><Stat label="Record" value={`${wins}-${losses}`}/></section>
-      <section className="card calendar-card">
-        <div className="calendar-head"><div><div className="section-kicker">BETTING CALENDAR</div><h2>{monthName}</h2></div><div className="calendar-controls"><button onClick={()=>changeMonth(-1)} aria-label="Previous month">‹</button><button onClick={()=>changeMonth(1)} aria-label="Next month">›</button></div></div>
-        <div className="calendar-weekdays">{["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(d=><span key={d}>{d}</span>)}</div>
-        <div className="calendar-grid">{cells.map((day,i)=>{const bet=day?byDay[day]:null; const isToday=day===6&&month===8&&year===2026; return <button key={i} disabled={!day} onClick={()=>day&&setSelectedDay(day)} className={`calendar-day ${!day?"blank":""} ${bet?.result==="WIN"?"win-day":""} ${bet?.result==="LOSS"?"loss-day":""} ${selectedDay===day?"selected":""} ${isToday?"today":""}`}><span>{day||""}</span>{bet&&<small>{bet.result}</small>}</button>})}</div>
-        <div className="calendar-legend"><span><i className="legend-dot win-dot"/>Win</span><span><i className="legend-dot loss-dot"/>Loss</span><span><i className="legend-dot no-bet-dot"/>No bet</span></div>
-      </section>
-      {selected&&<section className="card calendar-detail"><div className="section-kicker">DAY {selected.day}</div><div className="calendar-detail-main"><div><h2>{selected.team}</h2><span>{selected.opponent} • {selected.date}</span></div><b>{selected.odds}</b><strong>{selected.result}</strong></div></section>}
-      <section className="card"><div className="section-kicker">BANKROLL</div><div className="bankroll-big">${bankroll.toFixed(2)}</div><div className="muted">Starting bankroll $40.00</div></section>
-    </>;
-  }
-  function historyPage(){return <><PageTitle title="Bet History" subtitle="Every official LIFETIMEBETS play."/><section className="card history">{history.map(b=><div className="history-row" key={b.day}><div className="day">DAY {b.day}</div><div className="history-main"><b>{b.team}</b><span>vs {b.opponent} • {b.date}</span></div><div className="history-odds">{b.odds}</div><div className="win">{b.result}</div></div>)}</section></>;}
-  function challenge(){return <><PageTitle title="Challenge" subtitle="Build the bankroll one official play at a time."/><section className="challenge-card"><div className="challenge-number">3<span>/30</span></div><div className="challenge-copy"><b>30-Day Challenge</b><span>27 days remaining</span></div></section><section className="card rules"><div className="section-kicker">LOCKED RULES</div>{["Moneyline only","Odds must be -200 through -500","Any sport can qualify","One official play per day","No forced bet when nothing qualifies"].map(x=><div className="rule" key={x}><Icon type="shield"/><span>{x}</span></div>)}</section></>;}
-  function settings(){return <><PageTitle title="Settings" subtitle="Control how LIFETIMEBETS operates."/><section className="card rules">{[["Starting bankroll","$40.00"],["Current bankroll",`$${bankroll.toFixed(2)}`],["Odds range","-200 to -500"],["Market","Moneyline"],["Sports","All supported"],["Challenge","30 days"]].map(([a,b])=><div className="setting" key={a}><span>{a}</span><b>{b}</b></div>)}</section></>;}
-
-  return <main>
-    <header className="topbar"><button className="menu-btn" onClick={()=>setMenu(!menu)}><Icon type="menu"/></button><div className="brand"><img src="/lifetimebets-logo.png" alt="LB" /> <span>LIFETIMEBETS</span></div><div className="live-dot"><i/> LIVE</div></header>
-    {menu&&<div className="menu-pop"><b>LIFETIMEBETS</b><span>Professional sportsbook interface</span><span>Live all-sports slate</span><span>Moneyline filter: -200 to -500</span></div>}
-    <div className="content">{tab==="home"?home():tab==="picks"?picks():tab==="stats"?stats():tab==="challenge"?challenge():settings()}</div>
-    {msg&&<div className="toast">{msg}</div>}
-    <nav className="bottom-nav"><Nav active={tab==="home"} icon={<Icon type="home"/>} label="Home" onClick={()=>setTab("home")}/><Nav active={tab==="picks"} icon={<Icon type="list"/>} label="Picks" onClick={()=>setTab("picks")}/><Nav active={tab==="stats"} icon={<Icon type="chart"/>} label="Stats" onClick={()=>setTab("stats")}/><Nav active={tab==="challenge"} icon={<Icon type="calendar"/>} label="Challenge" onClick={()=>setTab("challenge")}/><Nav active={tab==="settings"} icon={<Icon type="settings"/>} label="Settings" onClick={()=>setTab("settings")}/></nav>
-  </main>;
-}
-
-function GameCard({game:g}){
-  const aq=Number.isFinite(g.awayOdds)&&g.awayOdds<=-200&&g.awayOdds>=-500, hq=Number.isFinite(g.homeOdds)&&g.homeOdds<=-200&&g.homeOdds>=-500;
-  return <article className="game-card"><div className="game-main"><div className="sport-label">{g.sportTitle}</div><div className="teams"><span>{g.away}</span><span>{g.home}</span></div><div className="game-time">{new Date(g.commenceTime).toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"})}</div></div><div className="lines"><Line name="ML" value={g.awayOdds} qualify={aq}/><Line name="ML" value={g.homeOdds} qualify={hq}/></div></article>;
-}
-function Line({name,value,qualify}){return <div className={qualify?"line qualify":"line"}><small>{name}</small><b>{Number.isFinite(value)?(value>0?"+":"")+value:"—"}</b>{qualify&&<em>QUALIFIES</em>}</div>;}
+export default function App(){
+ const [tab,setTab]=useState("home"),[sport,setSport]=useState("All"),[games,setGames]=useState([]),[loading,setLoading]=useState(false),[error,setError]=useState(""),[lastUpdated,setLastUpdated]=useState(null);
+ const [bankroll,setBankroll]=useState(83.29),[starting,setStarting]=useState(40),[history,setHistory]=useState(seed),[challenge,setChallenge]=useState(30),[settings,setSettings]=useState({stake:25,auto:true});
+ const [month,setMonth]=useState(new Date(2026,8,1)),[selected,setSelected]=useState(null),[notice,setNotice]=useState("");
+ useEffect(()=>{try{const s=JSON.parse(localStorage.getItem("lb_state")||"null");if(s){setBankroll(s.bankroll);setStarting(s.starting);setHistory(s.history);setChallenge(s.challenge);setSettings(s.settings||{stake:25,auto:true})}}catch{}},[]);
+ useEffect(()=>{localStorage.setItem("lb_state",JSON.stringify({bankroll,starting,history,challenge,settings}))},[bankroll,starting,history,challenge,settings]);
+ async function refresh(){setLoading(true);setError("");try{const r=await fetch("/api/odds?ts="+Date.now(),{cache:"no-store"});const d=await r.json();if(!r.ok)throw Error(d.error||"Live odds unavailable");setGames(d.games||[]);setLastUpdated(d.updatedAt);if(d.bestPick) setNotice(`Automatic #1 pick: ${d.bestPick.selection} ${d.bestPick.bestOdds}`);else setNotice("No qualifying play right now.")}catch(e){setError(e.message)}finally{setLoading(false)}}
+ useEffect(()=>{refresh()},[]);
+ const qual=useMemo(()=>games.flatMap(g=>(g.qualifying||[]).map(q=>({...g,bestOdds:q.price,selection:q.name,book:q.book}))).sort((a,b)=>implied(b.bestOdds)-implied(a.bestOdds)),[games]);
+ const top=qual[0]||null;const visible=sport==="All"?games:games.filter(g=>g.sport===sport);
+ const wins=history.filter(x=>x.result==="WIN").length,losses=history.filter(x=>x.result==="LOSS").length,profit=bankroll-starting,roi=starting?profit/starting*100:0;
+ function setPage(x){setTab(x);window.scrollTo({top:0,behavior:"smooth"})}
+ function settle(result){if(!top)return;const stake=Math.min(Number(settings.stake)||0,bankroll);if(stake<=0)return;const odds=top.bestOdds;const gain=result==="WIN"?stake*(odds<0?100/(-odds):odds/100):-stake;setBankroll(b=>Math.max(0,b+gain));setHistory(h=>[{day:h.length+1,date:new Date().toISOString().slice(0,10),team:top.selection,opponent:top.selection===top.home?top.away:top.home,odds,result},...h]);setNotice(`${result}: ${top.selection} recorded`)}
+ function calendar(){const y=month.getFullYear(),m=month.getMonth(),first=new Date(y,m,1).getDay(),n=new Date(y,m+1,0).getDate();const cells=Array(first).fill(null).concat(Array.from({length:n},(_,i)=>i+1));const map={};history.forEach(h=>(map[h.date]??=[]).push(h));return <><div className="cal card"><div className="calhead"><button onClick={()=>setMonth(new Date(y,m-1,1))}>‹</button><h2>{month.toLocaleString([],{month:"long",year:"numeric"})}</h2><button onClick={()=>setMonth(new Date(y,m+1,1))}>›</button></div><div className="week">{["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(x=><span key={x}>{x}</span>)}</div><div className="grid">{cells.map((d,i)=>{if(!d)return <div key={i} className="blank"/>;const key=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`,items=map[key]||[],r=items[0]?.result;return <button key={key} className={`day ${r==="WIN"?"win":r==="LOSS"?"loss":""} ${selected===key?"selected":""}`} onClick={()=>setSelected(key)}><b>{d}</b>{r&&<small>{r}</small>}</button>})}</div><div className="legend"><span>● Win</span><span>● Loss</span><span>○ No bet</span></div></div>{selected&&map[selected]?.length?<div className="card detail">{map[selected].map((h,i)=><div key={i}><b>{h.team}</b> <span>vs {h.opponent}</span><strong className={h.result.toLowerCase()}>{h.result}</strong><small>{h.odds} • {h.date}</small></div>)}</div>:null}</>}
+ function home(){return <><section className="hero"><div><label><Icon type="spark"/> LIVE SPORTSBOOK</label><h1>Every game.<br/><em>One system.</em></h1><p>Live odds across the slate with your permanent -200 to -500 moneyline rule.</p></div><img src="/lifetimebets-logo.png" alt="LB"/></section><div className="metrics"><div><span>Bankroll</span><b>${bankroll.toFixed(2)}</b></div><div><span>Record</span><b>{wins}-{losses}</b></div><div><span>ROI</span><b>{roi>=0?"+":""}{roi.toFixed(1)}%</b></div><div><span>Streak</span><b>W{wins}</b></div></div><PickCard top={top} loading={loading} refresh={refresh} auto={true}/><section className="sectionrow"><div><label>FULL SLATE</label><h2>{LABEL[sport]}</h2></div><span>{visible.length} games</span></section><div className="pills">{SPORTS.map(s=><Button key={s} active={sport===s} onClick={()=>setSport(s)}>{LABEL[s]}</Button>)}</div><div className="games">{visible.length?visible.map(g=><Game key={g.eventId} g={g}/>):<Empty text={loading?"Loading every sport…":"No games returned. Add your Odds API key in Vercel."}/>}</div></>}
+ function picks(){return <><Title t="Today's Pick" s="The app selects the #1 qualifying moneyline automatically."/><PickCard top={top} loading={loading} refresh={refresh} auto/><div className="card"><label>SELECTION RULE</label><div className="rules">{["Moneyline only","-200 through -500","All supported sports","Highest implied probability first","No qualifying line = NO BET"].map(x=><p key={x}><Icon type="shield"/>{x}</p>)}</div></div>{top&&<div className="actions"><button onClick={()=>settle("WIN")}>Mark Win</button><button onClick={()=>settle("LOSS")} className="secondary">Mark Loss</button></div>}</>}
+ function stats(){return <><Title t="Stats" s="Track performance and see every official betting day."/><div className="metrics four"><div><span>Profit</span><b className={profit>=0?"good":"bad"}>{fmtMoney(profit)}</b></div><div><span>Win Rate</span><b>{history.length?(wins/history.length*100).toFixed(1):"0.0"}%</b></div><div><span>Record</span><b>{wins}-{losses}</b></div><div><span>Avg Odds</span><b>{history.length?Math.round(history.reduce((a,x)=>a+x.odds,0)/history.length):0}</b></div></div>{calendar()}<div className="card"><label>BET HISTORY</label>{history.map(h=><div className="history" key={h.date+h.team}><div><b>{h.team}</b><span>{h.date} • vs {h.opponent}</span></div><strong>{h.odds}</strong><em className={h.result.toLowerCase()}>{h.result}</em></div>)}</div></>}
+ function challengePage(){const progress=Math.min(100,history.length/challenge*100);return <><Title t="Challenge" s={`${challenge}-day bankroll challenge.`/><div className="challenge card"><b>{history.length}<small>/{challenge}</small></b><div><h2>Days completed</h2><p>{Math.max(0,challenge-history.length)} days remaining</p></div></div><div className="progress"><i style={{width:`${progress}%`}}/></div><div className="card"><label>CHALLENGE RULES</label><p>One official play per day. The system can say NO BET. Results only count when you mark the automatic pick as Win or Loss.</p></div></>}
+ function settingsPage(){return <><Title t="Settings" s="Control your bankroll, stake and challenge."/><div className="card"><div className="setting"><span>Starting bankroll</span><input type="number" value={starting} onChange={e=>setStarting(Number(e.target.value)||0)}/></div><div className="setting"><span>Current bankroll</span><input type="number" value={bankroll} onChange={e=>setBankroll(Number(e.target.value)||0)}/></div><div className="setting"><span>Daily stake</span><input type="number" value={settings.stake} onChange={e=>setSettings({...settings,stake:Number(e.target.value)||0})}/></div><div className="setting"><span>Challenge days</span><input type="number" value={challenge} onChange={e=>setChallenge(Number(e.target.value)||30)}/></div></div><div className="card"><label>ODDS RULE</label><p>Moneyline only • -200 to -500 • all sports • automatic #1 selection.</p><p className="muted">Live odds are supplied by The Odds API through the secure server route.</p></div></>}
+ let body=tab==="home"?home():tab==="picks"?picks():tab==="stats"?stats():tab==="challenge"?challengePage():settingsPage();
+ return <><header><button className="brand" onClick={()=>setPage("home")}><img src="/lifetimebets-logo.png"/><span>LIFETIMEBETS</span></button><button className="refresh" onClick={refresh} disabled={loading}><span className={loading?"spin":""}><Icon type="refresh"/></span></button></header><main>{body}</main><nav><Nav active={tab==="home"} onClick={()=>setPage("home")} icon={<Icon type="home"/>} label="Home"/><Nav active={tab==="picks"} onClick={()=>setPage("picks")} icon={<Icon type="spark"/>} label="Picks"/><Nav active={tab==="stats"} onClick={()=>setPage("stats")} icon={<Icon type="chart"/>} label="Stats"/><Nav active={tab==="challenge"} onClick={()=>setPage("challenge")} icon={<Icon type="calendar"/>} label="Challenge"/><Nav active={tab==="settings"} onClick={()=>setPage("settings")} icon={<Icon type="settings"/>} label="Settings"/></nav>{notice&&<button className="toast" onClick={()=>setNotice("")}>{notice}</button>}{error&&<div className="error">{error}</div>}</>}
+function Nav({active,onClick,icon,label}){return <button className={active?"nav active":"nav"} onClick={onClick}>{icon}<span>{label}</span></button>}
+function Title({t,s}){return <div className="title"><label>LIFETIMEBETS</label><h1>{t}</h1><p>{s}</p></div>}
+function Empty({text}){return <div className="empty"><Icon type="shield"/><b>{text}</b></div>}
+function PickCard({top,loading,refresh,auto}){return <section className="card pick"><div className="cardtop"><div><label>{auto?"TODAY'S #1 PLAY • AUTOMATIC":"TOP QUALIFYING PLAY"}</label><h2>{top?top.selection:loading?"Scanning live slate…":"NO BET"}</h2></div><button onClick={refresh}><Icon type="refresh"/></button></div>{top?<><div className="match">{top.away} <span>at</span> {top.home}</div><div className="pickline"><b>{top.bestOdds}</b><div><strong>{implied(top.bestOdds).toFixed(1)}% implied</strong><span>{top.sportTitle} • {top.book||"Best available"}</span></div></div><div className="analysis"><Icon type="shield"/><span><b>Why #1:</b> highest implied probability among all qualifying moneylines returned by the live slate.</span></div></>:<Empty text={loading?"Scanning every supported sport…":"No qualifying play right now."}/>}</section>}
+function Game({g}){return <article className="game"><div><label>{g.sportTitle}</label><b>{g.away}</b><b>{g.home}</b><small>{new Date(g.commence).toLocaleString([], {weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})}</small></div><div className="lines">{g.lines?.slice(0,2).map(x=><span className={x.price>=-500&&x.price<=-200?"line q":"line"} key={x.name}><small>{x.name}</small><strong>{x.price}</strong>{x.price>=-500&&x.price<=-200?<em>QUALIFY</em>:null}</span>)}</div></article>}

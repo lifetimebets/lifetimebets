@@ -1,14 +1,3 @@
 import "./globals.css";
-
-export const metadata = {
-  title: "LIFETIMEBETS",
-  description: "One play. Every day.",
-};
-
-export default function RootLayout({ children }) {
-  return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  );
-}
+export const metadata={title:"LIFETIMEBETS — One Play. Every Day.",description:"Live sports odds, automatic daily pick, bankroll tracking and performance calendar."};
+export default function RootLayout({children}){return <html lang="en"><body>{children}</body></html>}

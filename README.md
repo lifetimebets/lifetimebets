@@ -1,22 +1,26 @@
-# LIFETIMEBETS v7
+# LIFETIMEBETS v8
 
-Professional Next.js sports-betting dashboard.
+Production-ready personal sports betting tracker and live odds dashboard.
 
-## v7 changes
-- Home and Picks are now separate screens.
-- Picks automatically selects the #1 qualifying moneyline from the full returned slate.
-- Moneyline rule remains -200 through -500 only.
-- Added live all-sports API route for NFL, NCAAF, MLB, NBA, NCAAB, WNBA, NHL, major soccer leagues, and US Open tennis.
-- Sports tabs filter the live slate by sport.
-- Stats includes the betting calendar.
-- Exact LIFETIMEBETS LB logo is included in `public/lifetimebets-logo.png`.
+## Stack
+- Next.js on Vercel
+- The Odds API for live moneylines
+- Server-side API key only
+- Local browser storage for personal bankroll/history/settings
 
-## Environment
-Set `ODDS_API_KEY` in Vercel Environment Variables. Never put the real key in GitHub.
+## Required environment variable
+`ODDS_API_KEY` — add in Vercel Project Settings → Environment Variables for Production, Preview, and Development as needed. Never put the real key in GitHub or a `NEXT_PUBLIC_` variable.
 
-## Run
-npm install
-npm run dev
+## Rules
+- Moneyline only
+- Qualifying range: -200 through -500
+- One automatic #1 pick when a qualifying line exists
+- No forced bet when nothing qualifies
+- All sports lobby plus sport filters
 
-## Deploy
-Push to GitHub and let the connected Vercel project deploy automatically.
+## Launch checklist
+1. Upload the repository contents to GitHub. Keep the existing `CNAME` if you already use it.
+2. Vercel deploys the `main` branch automatically.
+3. Add `ODDS_API_KEY` in Vercel and redeploy.
+4. Verify `/api/health` and the Home/Picks/Sports/Stats/Challenge/Settings screens.
+5. Point the production domain at Vercel after the Vercel deployment is verified.
